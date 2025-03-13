@@ -1,8 +1,8 @@
 #include <iostream>
 #include <cassert>
 #include <string>
-#include "Random.h"
 #include <algorithm>
+#include "Random.h"
 
 struct Card
 {
