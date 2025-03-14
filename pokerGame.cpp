@@ -160,9 +160,115 @@ std::vector<Card> fourOfKind(const T& cards)
 
     for (const auto& i : std::views::reverse(cardsCopy))
     {
-        if (!(i == bestHand.back()))
+        if (!(i.rank == bestHand.back().rank))
         {
             bestHand.push_back(i);
+            return bestHand;
+        }
+    }
+
+    return {};
+}
+
+template <typename T>
+std::vector<Card> threeOfKind(const T& cards)
+{
+    std::vector<Card> bestHand {};
+    bestHand.reserve(5);
+    T cardsCopy = cards;
+
+    Card::groupBySuitSort = false;
+    std::sort(cardsCopy.begin(),cardsCopy.end());
+
+    int rankCount {0};
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        if (!bestHand.empty() && bestHand.back().rank == i.rank)
+        {
+            ++rankCount;
+            bestHand.push_back(i);
+        }
+        else
+        {
+            bestHand.clear();
+            bestHand.push_back(i);
+            rankCount = 1;
+        }
+
+        if (rankCount == 3)
+        {
+            break;
+        }
+    }
+
+    if (rankCount < 3)
+    {
+        return {};
+    }
+
+    int cardsAdded {0};
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        if (!(i.rank == bestHand.data()[0].rank))
+        {
+            bestHand.push_back(i);
+            ++cardsAdded;
+        }
+        if (cardsAdded == 2)
+        {
+            return bestHand;
+        }
+    }
+
+    return {};
+}
+
+template <typename T>
+std::vector<Card> pair(const T& cards)
+{
+    std::vector<Card> bestHand {};
+    bestHand.reserve(5);
+    T cardsCopy = cards;
+
+    Card::groupBySuitSort = false;
+    std::sort(cardsCopy.begin(),cardsCopy.end());
+
+    int rankCount {0};
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        if (!bestHand.empty() && bestHand.back().rank == i.rank)
+        {
+            ++rankCount;
+            bestHand.push_back(i);
+        }
+        else
+        {
+            bestHand.clear();
+            bestHand.push_back(i);
+            rankCount = 1;
+        }
+
+        if (rankCount == 2)
+        {
+            break;
+        }
+    }
+
+    if (rankCount < 2)
+    {
+        return {};
+    }
+
+    int cardsAdded {0};
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        if (!(i.rank == bestHand.data()[0].rank))
+        {
+            bestHand.push_back(i);
+            ++cardsAdded;
+        }
+        if (cardsAdded == 3)
+        {
             return bestHand;
         }
     }
@@ -196,7 +302,7 @@ int main()
 
     std::cout << '\n';
 
-    std::vector<Card> bestHand = fourOfKind(testFourOfKind);
+    std::vector<Card> bestHand = pair(testFourOfKind);
 
     for (auto i : bestHand)
     {
