@@ -352,17 +352,103 @@ std::vector<Card> fullHouse(const T& cards)
 
 }
 
+template <typename T>
+std::vector<Card> twoPair(const T& cards)
+{
+    std::vector<Card> bestHand {};
+    bestHand.reserve(5);
+    T cardsCopy = cards;
+
+    Card::groupBySuitSort = false;
+    std::sort(cardsCopy.begin(),cardsCopy.end());
+
+    int rankCount {0};
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        if (!bestHand.empty() && bestHand.back().rank == i.rank)
+        {
+            ++rankCount;
+            bestHand.push_back(i);
+        }
+        else
+        {
+            bestHand.clear();
+            bestHand.push_back(i);
+            rankCount = 1;
+        }
+
+        if (rankCount == 2)
+        {
+            break;
+        }
+    }
+
+    if (rankCount < 2)
+    {
+        return {};
+    }
+
+    Card::Ranks foundFirstTwo {bestHand.data()[0].rank};
+    std::vector<Card> findTwo {};
+    rankCount = 0;
+
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        if (!findTwo.empty() && findTwo.back().rank == i.rank && !(foundFirstTwo == i.rank))
+        {
+            ++rankCount;
+            findTwo.push_back(i);
+        }
+        else if (!(foundFirstTwo == i.rank))
+        {
+            findTwo.clear();
+            findTwo.push_back(i);
+            rankCount = 1;
+        }
+        else
+        {
+            rankCount = 0;
+        }
+
+        if (rankCount == 2)
+        {
+            break;
+        }
+    }
+
+    if (rankCount < 2)
+    {
+        return {};
+    }
+
+    bestHand.push_back(findTwo.data()[0]);
+    bestHand.push_back(findTwo.data()[1]);
+
+    Card::Ranks foundSecondTwo {bestHand.back().rank};
+
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        if (!(i.rank == foundFirstTwo || i.rank == foundSecondTwo))
+        {
+            bestHand.push_back(i);
+            return bestHand;
+        }
+    }
+
+    return {};
+}
+
 int main()
 {
     std::vector<Card> test {
             {Card::rank_king, Card::suit_clubs},
             {Card::rank_king, Card::suit_diamonds},
-            {Card::rank_king, Card::suit_hearts},
+            {Card::rank_2, Card::suit_hearts},
             {Card::rank_7, Card::suit_spades},
             {Card::rank_7, Card::suit_clubs}
         };
 
-    std::vector<Card> bestHand = pair(test);
+    std::vector<Card> bestHand = twoPair(test);
 
     for (auto i : bestHand)
     {
