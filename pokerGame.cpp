@@ -14,21 +14,18 @@ struct Player
     int chips {Settings::buyIn};
 };
 
-template <std::size_t N>
-std::vector<Card> flush(std::array<Card, N> cards)
+template <typename T>
+std::vector<Card> flush(const T& cards)
 // vector output as it is moveable
 {
-    if (N<5)
-    {
-        return {};
-    }
-
     std::vector<Card> bestHand(5);
-    std::sort(cards.begin(),cards.end());
+
+    std::array cardsCopy = cards;
+    std::sort(cardsCopy.begin(),cardsCopy.end());
     
     Card::Suits prevSuit {Card::max_suits};
     std::size_t curPos {};
-    for (const auto& i : std::views::reverse(cards))
+    for (const auto& i : std::views::reverse(cardsCopy))
     {
         if (i.suit != prevSuit)
         {
@@ -47,8 +44,8 @@ std::vector<Card> flush(std::array<Card, N> cards)
 
 }
 
-template <std::size_t N>
-std::vector<Card> straight(const std::array<Card, N>& cards)
+template <typename T>
+std::vector<Card> straight(const T& cards)
 {
     std::array<Card, Card::max_ranks+1> rankCounter {};
     std::vector<Card> bestHand {};
@@ -89,46 +86,40 @@ std::vector<Card> straight(const std::array<Card, N>& cards)
     return {};
 }
 
-// template <std::size_t N>
-// bool straightFlush(const std::array<Card,N>& cards)
-// {
-//     std::array suitCounter {0, 0, 0, 0};
-    
-//     for (auto& i : cards)
-//     {
-//         ++suitCounter.data()[i.suit];
-//     }
+template <typename T>
+std::vector<Card> straightFlush(const T& cards)
+{
+    std::array suitCounter {0,0,0,0};
+    Card::Suits maxSuit  {Card::max_suits};
+    int maxSuitCount {0};
 
-//     Card::Suits mostSuit {};
-//     int mostSuitCount {0};
+    for (const auto& i : cards)
+    {
+        if ((++suitCounter.data()[i.suit]) > maxSuitCount)
+        {
+            maxSuitCount = suitCounter.data()[i.suit];
+            maxSuit = i.suit;
+        }
+    }
 
-//     for (auto i : Card::allSuits)
-//     {
-//         if (suitCounter.data()[i] > mostSuitCount)
-//         {
-//             mostSuitCount = suitCounter.data()[i];
-//             mostSuit = i;
-//         }
-//     }
+    if (maxSuitCount < 5)
+    {
+        return {};
+    }
 
-//     if (mostSuitCount < 5)
-//     {
-//         return false;
-//     }
+    std::vector<Card> candidates {};
+    candidates.reserve(std::size(cards));
 
-//     std::vector<Card> uniformSuit(static_cast<std::size_t>(mostSuitCount));
+    for (const auto& i : cards)
+    {
+        if (i.suit == maxSuit)
+        {
+            candidates.push_back(i);
+        }
+    }
 
-//     std::size_t counter {0};
-//     for (auto i : cards)
-//     {
-//         if (i.suit == mostSuit)
-//         {
-//             uniformSuit[counter++] = i;
-//         }
-//     }
-
-//     return straight(uniformSuit);
-// }
+    return straight(candidates);
+}
 
 int main()
 {
@@ -146,7 +137,7 @@ int main()
 
     std::cout << '\n';
 
-    std::vector<Card> bestHand = straight(cards);
+    std::vector<Card> bestHand = straightFlush(cards);
 
     for (auto i : bestHand)
     {
