@@ -2,6 +2,7 @@
 #include <cassert>
 #include <string>
 #include <algorithm>
+#include <vector>
 #include "Random.h"
 
 struct Card
@@ -50,6 +51,11 @@ struct Card
         out << ranks[card.rank] << suits[card.suit];
         return out;
     }
+
+    bool operator==(Card otherCard)
+    {
+        return ((rank == otherCard.rank) && (suit == otherCard.suit));
+    }
 };
 
 class Deck
@@ -58,6 +64,7 @@ class Deck
         static constexpr size_t m_decksize {52};
         std::array<Card, m_decksize> m_deck {};
         std::size_t m_nextCardIndex {0};
+        std::vector <Card> m_cardsChosen {};
 
     public:
         Deck()
@@ -75,6 +82,14 @@ class Deck
         
         void shuffle()
         {
+            m_cardsChosen.clear();
+            std::shuffle(m_deck.begin(), m_deck.end(), Random::mt);
+            m_nextCardIndex = 0;
+        }
+
+        void shuffle(const std::vector<Card>& cardsChosen)
+        {
+            m_cardsChosen = cardsChosen;
             std::shuffle(m_deck.begin(), m_deck.end(), Random::mt);
             m_nextCardIndex = 0;
         }
@@ -82,6 +97,31 @@ class Deck
         Card dealCard()
         {
             assert(m_nextCardIndex != 52 && "Deck::dealCard ran out of cards");
+            while (in(m_deck[m_nextCardIndex],m_cardsChosen))
+            {
+                ++m_nextCardIndex;
+            }
             return m_deck[m_nextCardIndex++];
         }
+
+        bool in(Card card, const std::vector<Card>& set)
+        {
+            for (auto i : set)
+            {
+                if (card == i)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 };
+
+int main()
+{
+    Deck deck {};
+    deck.shuffle();
+
+    return 0;
+}
