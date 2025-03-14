@@ -20,7 +20,8 @@ std::vector<Card> flush(const T& cards)
 {
     std::vector<Card> bestHand(5);
 
-    std::array cardsCopy = cards;
+    Card::groupBySuitSort = true;
+    T cardsCopy = cards;
     std::sort(cardsCopy.begin(),cardsCopy.end());
     
     Card::Suits prevSuit {Card::max_suits};
@@ -121,12 +122,70 @@ std::vector<Card> straightFlush(const T& cards)
     return straight(candidates);
 }
 
+template <typename T>
+std::vector<Card> fourOfKind(const T& cards)
+{
+    std::vector<Card> bestHand {};
+    bestHand.reserve(5);
+    T cardsCopy = cards;
+
+    Card::groupBySuitSort = false;
+    std::sort(cardsCopy.begin(),cardsCopy.end());
+
+    int rankCount {0};
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        if (!bestHand.empty() && bestHand.back().rank == i.rank)
+        {
+            ++rankCount;
+            bestHand.push_back(i);
+        }
+        else
+        {
+            bestHand.clear();
+            bestHand.push_back(i);
+            rankCount = 1;
+        }
+
+        if (rankCount == 4)
+        {
+            break;
+        }
+    }
+
+    if (rankCount < 4)
+    {
+        return {};
+    }
+
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        if (!(i == bestHand.back()))
+        {
+            bestHand.push_back(i);
+            return bestHand;
+        }
+    }
+
+    return {};
+}
+
 int main()
 {
-    Deck deck {};
-    // deck.shuffle();
+    std::vector<Card> testFourOfKind {
+        Card{Card::rank_king, Card::suit_hearts},
+        Card{Card::rank_king, Card::suit_spades},
+        Card{Card::rank_king, Card::suit_diamonds},
+        Card{Card::rank_king, Card::suit_clubs},
+        Card{Card::rank_ace, Card::suit_spades},
+        Card{Card::rank_3, Card::suit_hearts},
+        Card{Card::rank_2, Card::suit_clubs}
+    };
 
-    constexpr int drawnCards {7};
+    Deck deck {};
+    deck.shuffle(testFourOfKind);
+
+    constexpr int drawnCards {0};
     std::array<Card,drawnCards> cards {};
 
     for (int i {0}; i<drawnCards; ++i)
@@ -137,7 +196,7 @@ int main()
 
     std::cout << '\n';
 
-    std::vector<Card> bestHand = straightFlush(cards);
+    std::vector<Card> bestHand = fourOfKind(testFourOfKind);
 
     for (auto i : bestHand)
     {
