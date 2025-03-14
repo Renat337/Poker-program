@@ -117,11 +117,3 @@ class Deck
             return false;
         }
 };
-
-int main()
-{
-    Deck deck {};
-    deck.shuffle();
-
-    return 0;
-}
