@@ -276,33 +276,93 @@ std::vector<Card> pair(const T& cards)
     return {};
 }
 
-int main()
+template <typename T>
+std::vector<Card> fullHouse(const T& cards)
 {
-    std::vector<Card> testFourOfKind {
-        Card{Card::rank_king, Card::suit_hearts},
-        Card{Card::rank_king, Card::suit_spades},
-        Card{Card::rank_king, Card::suit_diamonds},
-        Card{Card::rank_king, Card::suit_clubs},
-        Card{Card::rank_ace, Card::suit_spades},
-        Card{Card::rank_3, Card::suit_hearts},
-        Card{Card::rank_2, Card::suit_clubs}
-    };
+    std::vector<Card> bestHand {};
+    bestHand.reserve(5);
+    T cardsCopy = cards;
 
-    Deck deck {};
-    deck.shuffle(testFourOfKind);
+    Card::groupBySuitSort = false;
+    std::sort(cardsCopy.begin(),cardsCopy.end());
 
-    constexpr int drawnCards {0};
-    std::array<Card,drawnCards> cards {};
-
-    for (int i {0}; i<drawnCards; ++i)
+    int rankCount {0};
+    for (const auto& i : std::views::reverse(cardsCopy))
     {
-        cards.data()[i] = deck.dealCard();
-        std::cout << cards.data()[i] << ' ';
+        if (!bestHand.empty() && bestHand.back().rank == i.rank)
+        {
+            ++rankCount;
+            bestHand.push_back(i);
+        }
+        else
+        {
+            bestHand.clear();
+            bestHand.push_back(i);
+            rankCount = 1;
+        }
+
+        if (rankCount == 3)
+        {
+            break;
+        }
     }
 
-    std::cout << '\n';
+    if (rankCount < 3)
+    {
+        return {};
+    }
 
-    std::vector<Card> bestHand = pair(testFourOfKind);
+    Card::Ranks foundThree {bestHand.data()[0].rank};
+    std::vector<Card> findTwo {};
+    rankCount = 0;
+
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        if (!findTwo.empty() && findTwo.back().rank == i.rank && !(foundThree == i.rank))
+        {
+            ++rankCount;
+            findTwo.push_back(i);
+        }
+        else if (!(foundThree == i.rank))
+        {
+            findTwo.clear();
+            findTwo.push_back(i);
+            rankCount = 1;
+        }
+        else
+        {
+            rankCount = 0;
+        }
+
+        if (rankCount == 2)
+        {
+            break;
+        }
+    }
+
+    if (rankCount < 2)
+    {
+        return {};
+    }
+
+    bestHand.push_back(findTwo.data()[0]);
+    bestHand.push_back(findTwo.data()[1]);
+
+    return bestHand;
+
+}
+
+int main()
+{
+    std::vector<Card> test {
+            {Card::rank_king, Card::suit_clubs},
+            {Card::rank_king, Card::suit_diamonds},
+            {Card::rank_king, Card::suit_hearts},
+            {Card::rank_7, Card::suit_spades},
+            {Card::rank_7, Card::suit_clubs}
+        };
+
+    std::vector<Card> bestHand = pair(test);
 
     for (auto i : bestHand)
     {
