@@ -1,4 +1,5 @@
 #include "deck.cpp"
+#include <ranges>
 
 namespace Settings
 {
@@ -14,24 +15,36 @@ struct Player
 };
 
 template <std::size_t N>
-bool flush(const std::array<Card, N>& cards)
+std::vector<Card> flush(std::array<Card, N>& cards)
+// vector output as it is moveable
 {
-    std::array suitCounter {0, 0, 0, 0};
-    
-    for (auto& i : cards)
+    if (N<5)
     {
-        ++suitCounter.data()[i.suit];
+        return {};
     }
 
-    for (auto& i : suitCounter)
+    std::vector<Card> bestHand(5);
+    std::sort(cards.begin(),cards.end());
+    
+    Card::Suits prevSuit {Card::max_suits};
+    std::size_t curPos {};
+    for (const auto& i : std::views::reverse(cards))
     {
-        if (i >= 5)
+        if (i.suit != prevSuit)
         {
-            return true;
+            curPos = 0;
+            prevSuit = i.suit;
+        }
+
+        bestHand[curPos++] = i;
+        if (curPos>=5)
+        {
+            return bestHand;
         }
     }
+    
+    return {};
 
-    return false;
 }
 
 template <std::size_t N>
@@ -140,20 +153,6 @@ int main()
 {
     Deck deck {};
     deck.shuffle();
-
-    constexpr std::size_t numDraws {7};
-    std::array<Card, numDraws> cards{};
-
-    for (std::size_t i {0}; i<numDraws; ++i)
-    {
-        cards[i] = deck.dealCard();
-        std::cout << cards[i] << ' ';
-    }
-
-    std::cout << '\n';
-
-    std::cout << straightFlush(cards);
-
 
     return 0;
 }

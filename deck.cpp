@@ -56,6 +56,19 @@ struct Card
     {
         return ((rank == otherCard.rank) && (suit == otherCard.suit));
     }
+
+    bool operator<(const Card& otherCard) const
+    {
+        if (suit != otherCard.suit)
+        {
+            return suit < otherCard.suit;
+        }
+        
+        auto cardVal {(rank == rank_ace) ? max_ranks : rank};
+        auto otherCardVal {(otherCard.rank == rank_ace) ? max_ranks : otherCard.rank};
+
+        return cardVal < otherCardVal;
+    }
 };
 
 class Deck
