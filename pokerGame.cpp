@@ -3,9 +3,36 @@
 
 namespace Settings
 {
-    int smallBlind {1};
-    int bigBlind {2};
-    int buyIn {200};
+    [[maybe_unused]] constexpr int mallBlind {1};
+    [[maybe_unused]] constexpr int bigBlind {2};
+    [[maybe_unused]] constexpr int buyIn {200};
+
+    enum Rankings
+    {
+        high_card,
+        pair,
+        two_pair,
+        three_kind,
+        straight,
+        flush,
+        full_house,
+        four_kind,
+        straight_flush,
+
+        max_rankings
+    };
+
+    [[maybe_unused]] static constexpr std::array<Rankings, max_rankings> allRankings {high_card, pair, two_pair, three_kind, straight,
+                                                                    flush, full_house, four_kind, straight_flush};
+
+    std::ostream& operator<<(std::ostream& out, const Rankings ranking)
+    {
+        static constexpr std::array rankings {"high card", "pair", "two pair", "three of a kind", "straight", "flush", 
+                                                "full house", "four of a kind", "straight flush"};
+
+        out << rankings[ranking];
+        return out;
+    }
 }
 
 struct Player
@@ -438,6 +465,24 @@ std::vector<Card> twoPair(const T& cards)
     return {};
 }
 
+template <typename T>
+std::vector<Card> highCard(const T& cards)
+{
+    std::vector<Card> bestHand {};
+    bestHand.reserve(5);
+    T cardsCopy = cards;
+
+    Card::groupBySuitSort = false;
+    std::sort(cardsCopy.begin(),cardsCopy.end());
+
+    for (const auto& i : std::views::reverse(cardsCopy))
+    {
+        bestHand.push_back(i);
+    }
+
+    return bestHand;
+}
+
 int main()
 {
     std::vector<Card> test {
@@ -448,7 +493,7 @@ int main()
             {Card::rank_7, Card::suit_clubs}
         };
 
-    std::vector<Card> bestHand = twoPair(test);
+    std::vector<Card> bestHand = highCard(test);
 
     for (auto i : bestHand)
     {
