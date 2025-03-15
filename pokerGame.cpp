@@ -528,50 +528,127 @@ struct HandFunction
     Settings::Rankings ranking;
 };
 
-int playGame(int numPlayers, std::array<Card, 2>& hand)
+std::vector<Player> dealHands(Deck& deck, std::size_t numPlayers, bool controlHands)
 {
-    Deck deck {};
+    std::vector<Player> players(numPlayers);
+
+    if (controlHands)
+    {
+        for (std::size_t i {0}; i<numPlayers; ++i)
+        {
+            std::cout << "Input the hand for player" << i << '\n';
+            std::cin >> players[i].hand.data()[0] >> players[i].hand.data()[1];
+        }
+        return players;
+    }
+
     deck.shuffle();
-
-    std::array<Card,7> communalCards {};
-
-    std::vector<Player> players(static_cast<std::size_t>(numPlayers));
-    players.data()[0].isPlayer = true;
-    players.data()[0].hand = hand;
 
     for (auto& i : players)
     {
-        if (!i.isPlayer)
-        {
-            i.hand.data()[0] = deck.dealCard();
-            i.hand.data()[1] = deck.dealCard();
-        }
-        // std::cout << i.hand.data()[0] << ' ' << i.hand.data()[1] << '\n';
+        i.hand.data()[0] = deck.dealCard();
+        i.hand.data()[1] = deck.dealCard();
     }
 
-    // std::cout << '\n';
+    return players;
+    
+}
 
-    // betting here
+int playGame()
+{
+    Deck deck {};
 
-    for (std::size_t i {0}; i<3; ++i)
+    std::size_t numPlayers {};
+    std::cout << "Number of players:\n";
+    std::cin >> numPlayers;
+
+    std::cout << "Type i to input their hands, otherwise type n: ";
+    char controlHandsChar {};
+    std::cin >> controlHandsChar;
+    bool controlHands {controlHandsChar == 'i'};
+
+    std::vector<Player> players = dealHands(deck, numPlayers, controlHands);
+    std::array<Card,7> communalCards {};
+    std::vector<Card> usedCards {};
+    usedCards.reserve(5+2*numPlayers);
+
+    char controlCommunalChar {};
+    bool controlCommunal {};
+
+    if (controlHands)
     {
-        communalCards[i] = deck.dealCard();
-        // std::cout << communalCards[i] << ' ';
+        std::cout << "Do you want to control the communal cards as well? Type i or n:";
+        std::cin >> controlCommunalChar;
+        controlCommunal = controlCommunalChar == 'i';
+        
+        for (const auto& i : players)
+        {
+            usedCards.push_back(i.hand.data()[0]);
+            usedCards.push_back(i.hand.data()[1]);
+        }
     }
 
-    // std::cout << '\n';
+    if (controlCommunal)
+    {
+        std::cout << "How many communal cards would you like to control?";
+        std::size_t numControl {};
+        std::cin >> numControl;
 
-    // betting here
+        assert(numControl <= 5);
 
-    communalCards.data()[3] = deck.dealCard();
-    // std::cout << communalCards.data()[3] << '\n';
+        for (std::size_t i {0}; i<numControl; ++i)
+        {
+            std::cout << "Input communal card " << i;
+            std::cin >> communalCards[i];
+            usedCards.push_back(communalCards[i]);
+        }
 
-    //betting here
+        deck.shuffle(usedCards);
 
-    communalCards.data()[4] = deck.dealCard();
-    // std::cout << communalCards.data()[4] << '\n';
+        for (std::size_t i{numControl}; i<5; ++i)
+        {
+            communalCards[i] = deck.dealCard();
+        }
+    }
+    else
+    {
+        // std::cout << '\n';
 
-    //betting here
+        // betting here
+
+        for (std::size_t i {0}; i<3; ++i)
+        {
+            communalCards[i] = deck.dealCard();
+            // std::cout << communalCards[i] << ' ';
+        }
+
+        // std::cout << '\n';
+
+        // betting here
+
+        communalCards.data()[3] = deck.dealCard();
+        // std::cout << communalCards.data()[3] << '\n';
+
+        //betting here
+
+        communalCards.data()[4] = deck.dealCard();
+        // std::cout << communalCards.data()[4] << '\n';
+
+        //betting here
+    }
+
+    std::cout << "Hands:\n";
+    for (const auto& i : players)
+    {
+        std::cout << i.hand.data()[0] << ' ' << i.hand.data()[1] << '\n';
+    }
+
+    std::cout << "Communal cards:\n";
+    for (std::size_t i {0}; i < 5; ++i)
+    {
+        std::cout << communalCards[i] << ' ';
+    }
+    std::cout << '\n';
 
     const std::vector<HandFunction> handFunctions {
         {&straightFlush<std::array<Card,7>>, Settings::straight_flush},
@@ -620,36 +697,35 @@ int playGame(int numPlayers, std::array<Card, 2>& hand)
 
     std::sort(winning.begin(), winning.end());
 
-    if (std::ssize(winning) > 1)
-    {
-        Player final = winning.back();
-        winning.pop_back();
-        Player penultimate = winning.back();
+    // if (std::ssize(winning) > 1)
+    // {
+    //     Player final = winning.back();
+    //     winning.pop_back();
+    //     Player penultimate = winning.back();
 
-        if (final < penultimate && penultimate < final)
-        {
-            std::cout << "Draw!!!" << '\n';
-            return 0;
-        }
+    //     if (final < penultimate && penultimate < final)
+    //     {
+    //         std::cout << "Draw!!!" << '\n';
+    //         return 0;
+    //     }
 
-        return final.isPlayer;
-    }
+    //     return final.isPlayer;
+    // }
 
+    std::cout << "Winner:\n";
+    winning.back().print();
     return winning.back().isPlayer;
 
 }
 
 int main()
 {
-    int numPlayers {2};
-    int tries {100000};
+    int tries {1};
     int wins {0};
-
-    std::array<Card, 2> hand {{{Card::rank_ace,Card::suit_clubs},{Card::rank_ace,Card::suit_diamonds}}};
     
     for (int i {0}; i<tries; ++i)
     {
-        if (playGame(numPlayers, hand))
+        if (playGame())
         {
             ++wins;
         }

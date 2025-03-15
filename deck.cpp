@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include "Random.h"
+#include <algorithm>
 
 struct Card
 {
@@ -45,9 +46,6 @@ struct Card
 
     friend std::ostream& operator<<(std::ostream& out, const Card& card)
     {
-        static constexpr std::array ranks { 'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K' };
-        static constexpr std::array suits { 'C', 'D', 'H', 'S' };
-
         out << ranks[card.rank] << suits[card.suit];
         return out;
     }
@@ -83,6 +81,44 @@ struct Card
         return suit < otherCard.suit;
 
     }
+
+    friend std::istream& operator>>(std::istream& in, Card& card)
+    {
+        char r {};
+        char s {};
+
+        while (true)
+        {
+            in >> r >> s;
+
+            if (in.fail())
+            {
+                in.clear();
+                in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Invalid input. Try again: \n";
+                continue;
+            }
+
+            auto posRank {std::find(card.ranks.begin(),card.ranks.end(),r)};
+            auto posSuit {std::find(card.suits.begin(),card.suits.end(),s)};
+            
+            if (posRank == card.ranks.end() || posSuit == card.suits.end())
+            {
+                std::cout << "Invalid input. Try again: \n";
+                continue;
+            }
+            
+            card.rank = static_cast<Ranks>(std::distance(card.ranks.begin(), posRank));
+            card.suit = static_cast<Suits>(std::distance(card.suits.begin(), posSuit));
+    
+            return in;
+            
+        }
+    }
+
+    private:
+        static constexpr std::array ranks { 'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K' };
+        static constexpr std::array suits { 'C', 'D', 'H', 'S' };
 };
 
 class Deck
