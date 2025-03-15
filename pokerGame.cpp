@@ -4,7 +4,7 @@
 
 namespace Settings
 {
-    [[maybe_unused]] constexpr int mallBlind {1};
+    [[maybe_unused]] constexpr int smallBlind {1};
     [[maybe_unused]] constexpr int bigBlind {2};
     [[maybe_unused]] constexpr int buyIn {200};
 
