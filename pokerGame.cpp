@@ -43,6 +43,8 @@ struct Player
     Settings::Rankings handType {};
     std::vector<Card> bestHand {};
 
+    bool isPlayer {false};
+
     bool operator<(const Player otherPlayer) const
     {
         if (handType != otherPlayer.handType)
@@ -526,7 +528,7 @@ struct HandFunction
     Settings::Rankings ranking;
 };
 
-Player playGame(int numPlayers)
+int playGame(int numPlayers, std::array<Card, 2>& hand)
 {
     Deck deck {};
     deck.shuffle();
@@ -534,35 +536,40 @@ Player playGame(int numPlayers)
     std::array<Card,7> communalCards {};
 
     std::vector<Player> players(static_cast<std::size_t>(numPlayers));
+    players.data()[0].isPlayer = true;
+    players.data()[0].hand = hand;
 
     for (auto& i : players)
     {
-        i.hand.data()[0] = deck.dealCard();
-        i.hand.data()[1] = deck.dealCard();
-        std::cout << i.hand.data()[0] << ' ' << i.hand.data()[1] << '\n';
+        if (!i.isPlayer)
+        {
+            i.hand.data()[0] = deck.dealCard();
+            i.hand.data()[1] = deck.dealCard();
+        }
+        // std::cout << i.hand.data()[0] << ' ' << i.hand.data()[1] << '\n';
     }
 
-    std::cout << '\n';
+    // std::cout << '\n';
 
     // betting here
 
     for (std::size_t i {0}; i<3; ++i)
     {
         communalCards[i] = deck.dealCard();
-        std::cout << communalCards[i] << ' ';
+        // std::cout << communalCards[i] << ' ';
     }
 
-    std::cout << '\n';
+    // std::cout << '\n';
 
     // betting here
 
     communalCards.data()[3] = deck.dealCard();
-    std::cout << communalCards.data()[3] << '\n';
+    // std::cout << communalCards.data()[3] << '\n';
 
     //betting here
 
     communalCards.data()[4] = deck.dealCard();
-    std::cout << communalCards.data()[4] << '\n';
+    // std::cout << communalCards.data()[4] << '\n';
 
     //betting here
 
@@ -613,19 +620,42 @@ Player playGame(int numPlayers)
 
     std::sort(winning.begin(), winning.end());
 
-    return (!winning.empty()) ? winning.back() : Player {};
+    if (std::ssize(winning) > 1)
+    {
+        Player final = winning.back();
+        winning.pop_back();
+        Player penultimate = winning.back();
+
+        if (final < penultimate && penultimate < final)
+        {
+            std::cout << "Draw!!!" << '\n';
+            return 0;
+        }
+
+        return final.isPlayer;
+    }
+
+    return winning.back().isPlayer;
 
 }
 
 int main()
 {
     int numPlayers {2};
+    int tries {100000};
+    int wins {0};
 
-    Player winner {playGame(numPlayers)};
+    std::array<Card, 2> hand {{{Card::rank_ace,Card::suit_clubs},{Card::rank_ace,Card::suit_diamonds}}};
+    
+    for (int i {0}; i<tries; ++i)
+    {
+        if (playGame(numPlayers, hand))
+        {
+            ++wins;
+        }
+    }
 
-    std::cout << '\n';
-
-    winner.print();
+    std::cout << static_cast<double>(wins)/tries << '\n';
 
     return 0;
 }
