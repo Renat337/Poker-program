@@ -88,12 +88,14 @@ struct Card
 class Deck
 {
     private:
+
         static constexpr size_t m_decksize {52};
         std::array<Card, m_decksize> m_deck {};
         std::size_t m_nextCardIndex {0};
         std::vector <Card> m_cardsChosen {};
 
     public:
+    
         Deck()
         {
             size_t counter {0};

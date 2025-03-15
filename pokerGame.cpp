@@ -1,5 +1,6 @@
 #include "deck.cpp"
 #include <ranges>
+#include <functional>
 
 namespace Settings
 {
@@ -39,11 +40,45 @@ struct Player
 {
     std::array<Card, 2> hand {};
     int chips {Settings::buyIn};
+    Settings::Rankings handType {};
+    std::vector<Card> bestHand {};
+
+    bool operator<(const Player otherPlayer) const
+    {
+        if (handType != otherPlayer.handType)
+        {
+            return handType < otherPlayer.handType;
+        }
+
+        for (std::size_t i {0}; i<5; ++i)
+        {
+            int value {(bestHand[i].rank == Card::rank_ace) ? Card::max_ranks : bestHand[i].rank};
+            int otherPlayerValue {(otherPlayer.bestHand[i].rank == Card::rank_ace) ? Card::max_ranks : 
+                otherPlayer.bestHand[i].rank};
+            if (value != otherPlayerValue)
+            {
+                return value < otherPlayerValue;
+            }
+        }
+
+        return false;
+    }
+
+    void print()
+    {
+        std::cout << hand.data()[0] << ' ' << hand.data()[1] << '\n';
+        std::cout << handType << '\n';
+        
+        for (const auto& i : bestHand)
+        {
+            std::cout << i << ' ';
+        }
+        std::cout << '\n';
+    }
 };
 
 template <typename T>
 std::vector<Card> flush(const T& cards)
-// vector output as it is moveable
 {
     std::vector<Card> bestHand(5);
 
@@ -483,22 +518,114 @@ std::vector<Card> highCard(const T& cards)
     return bestHand;
 }
 
+struct HandFunction
+{
+    using HandEvaluator = std::function<std::vector<Card>(std::array<Card,7>)>;
+    
+    HandEvaluator function;
+    Settings::Rankings ranking;
+};
+
+Player playGame(int numPlayers)
+{
+    Deck deck {};
+    deck.shuffle();
+
+    std::array<Card,7> communalCards {};
+
+    std::vector<Player> players(static_cast<std::size_t>(numPlayers));
+
+    for (auto& i : players)
+    {
+        i.hand.data()[0] = deck.dealCard();
+        i.hand.data()[1] = deck.dealCard();
+        std::cout << i.hand.data()[0] << ' ' << i.hand.data()[1] << '\n';
+    }
+
+    std::cout << '\n';
+
+    // betting here
+
+    for (std::size_t i {0}; i<3; ++i)
+    {
+        communalCards[i] = deck.dealCard();
+        std::cout << communalCards[i] << ' ';
+    }
+
+    std::cout << '\n';
+
+    // betting here
+
+    communalCards.data()[3] = deck.dealCard();
+    std::cout << communalCards.data()[3] << '\n';
+
+    //betting here
+
+    communalCards.data()[4] = deck.dealCard();
+    std::cout << communalCards.data()[4] << '\n';
+
+    //betting here
+
+    const std::vector<HandFunction> handFunctions {
+        {&straightFlush<std::array<Card,7>>, Settings::straight_flush},
+        {&fourOfKind<std::array<Card,7>>, Settings::four_kind},
+        {&fullHouse<std::array<Card,7>>, Settings::full_house},
+        {&flush<std::array<Card,7>>, Settings::flush},
+        {&straight<std::array<Card,7>>, Settings::straight},
+        {&threeOfKind<std::array<Card,7>>, Settings::three_kind},
+        {&twoPair<std::array<Card,7>>, Settings::two_pair},
+        {&pair<std::array<Card,7>>, Settings::pair},
+        {&highCard<std::array<Card,7>>, Settings::high_card}
+    };
+
+    Settings::Rankings bestHandType {Settings::high_card};
+    std::vector<Player> winning {};
+
+    for (auto& player : players)
+    {
+        communalCards[5] = player.hand[0];
+        communalCards[6] = player.hand[1];
+
+        for (const auto& handFunc : handFunctions)
+        {
+            auto bestHand = handFunc.function(communalCards);
+            if (!bestHand.empty())
+            {
+                player.bestHand = std::move(bestHand);
+                player.handType = handFunc.ranking;
+
+                if (player.handType > bestHandType)
+                {
+                    bestHandType = player.handType;
+                    winning.clear();
+                    winning.push_back(player);
+                }
+                else if (player.handType == bestHandType)
+                {
+                    winning.push_back(player);
+                }
+                break;
+            }
+        }
+    }
+
+    // need to implement draw
+
+    std::sort(winning.begin(), winning.end());
+
+    return (!winning.empty()) ? winning.back() : Player {};
+
+}
+
 int main()
 {
-    std::vector<Card> test {
-            {Card::rank_king, Card::suit_clubs},
-            {Card::rank_king, Card::suit_diamonds},
-            {Card::rank_2, Card::suit_hearts},
-            {Card::rank_7, Card::suit_spades},
-            {Card::rank_7, Card::suit_clubs}
-        };
+    int numPlayers {2};
 
-    std::vector<Card> bestHand = highCard(test);
+    Player winner {playGame(numPlayers)};
 
-    for (auto i : bestHand)
-    {
-        std::cout << i << ' ';
-    }
+    std::cout << '\n';
+
+    winner.print();
 
     return 0;
 }
