@@ -582,8 +582,8 @@ std::vector<Player> dealHands(Deck& deck, std::size_t numPlayers, bool controlHa
     
 }
 
-Settings::GameStates playGame()
-{
+ std::vector<Player> gameBeginning(std::array<Card,7>& communalCards)
+ {
     Deck deck {};
 
     std::size_t numPlayers {};
@@ -596,7 +596,6 @@ Settings::GameStates playGame()
     bool controlHands {controlHandsChar == 'i'};
 
     std::vector<Player> players = dealHands(deck, numPlayers, controlHands);
-    std::array<Card,7> communalCards {};
     std::vector<Card> usedCards {};
     usedCards.reserve(5+2*numPlayers);
     players.data()[0].isPlayer = true;
@@ -615,70 +614,56 @@ Settings::GameStates playGame()
             usedCards.push_back(i.hand.data()[0]);
             usedCards.push_back(i.hand.data()[1]);
         }
-    }
 
-    if (controlCommunal)
-    {
-        std::cout << "How many communal cards would you like to control?";
-        std::size_t numControl {};
-        std::cin >> numControl;
-
-        assert(numControl <= 5);
-
-        for (std::size_t i {0}; i<numControl; ++i)
+        if (controlCommunal)
         {
-            std::cout << "Input communal card " << i;
-            std::cin >> communalCards[i];
-            usedCards.push_back(communalCards[i]);
+            std::cout << "How many communal cards would you like to control?";
+            std::size_t numControl {};
+            std::cin >> numControl;
+
+            assert(numControl <= 5);
+
+            for (std::size_t i {0}; i<numControl; ++i)
+            {
+                std::cout << "Input communal card " << i;
+                std::cin >> communalCards[i];
+                usedCards.push_back(communalCards[i]);
+            }
+
+            deck.shuffle(usedCards);
+
+            for (std::size_t i{numControl}; i<5; ++i)
+            {
+                communalCards[i] = deck.dealCard();
+            }
         }
-
-        deck.shuffle(usedCards);
-
-        for (std::size_t i{numControl}; i<5; ++i)
+        else
         {
-            communalCards[i] = deck.dealCard();
+            deck.shuffle(usedCards);
+            for (std::size_t i {0}; i<5; ++i)
+            {
+                communalCards[i] = deck.dealCard();
+                // std::cout << communalCards[i] << ' ';
+            }
         }
     }
     else
     {
-        // std::cout << '\n';
+        deck.shuffle();
 
-        // betting here
-
-        for (std::size_t i {0}; i<3; ++i)
+        for (std::size_t i {0}; i<5; ++i)
         {
             communalCards[i] = deck.dealCard();
             // std::cout << communalCards[i] << ' ';
         }
 
-        // std::cout << '\n';
-
-        // betting here
-
-        communalCards.data()[3] = deck.dealCard();
-        // std::cout << communalCards.data()[3] << '\n';
-
-        //betting here
-
-        communalCards.data()[4] = deck.dealCard();
-        // std::cout << communalCards.data()[4] << '\n';
-
-        //betting here
     }
 
-    std::cout << "Hands:\n";
-    for (const auto& i : players)
-    {
-        std::cout << i.hand.data()[0] << ' ' << i.hand.data()[1] << '\n';
-    }
+    return players;
+ }
 
-    std::cout << "Communal cards:\n";
-    for (std::size_t i {0}; i < 5; ++i)
-    {
-        std::cout << communalCards[i] << ' ';
-    }
-    std::cout << '\n';
-
+Settings::GameStates checkWinner(std::vector<Player>& players, std::array<Card, 7>& communalCards)
+{
     const std::vector<HandFunction> handFunctions {
         {&straightFlush<std::array<Card,7>>, Settings::straight_flush},
         {&fourOfKind<std::array<Card,7>>, Settings::four_kind},
@@ -722,29 +707,7 @@ Settings::GameStates playGame()
         }
     }
 
-    // need to implement draw
-
     std::sort(winning.begin(), winning.end());
-
-    // if (std::ssize(winning) > 1)
-    // {
-    //     Player final = winning.back();
-    //     winning.pop_back();
-    //     Player penultimate = winning.back();
-
-    //     if (final < penultimate && penultimate < final)
-    //     {
-    //         std::cout << "Draw!!!" << '\n';
-    //         return 0;
-    //     }
-
-    //     return final.isPlayer;
-    // }
-
-    for (const auto& i : winning)
-    {
-        i.print();
-    }
 
     for (int i {0}; i<std::ssize(winning); ++i)
     {
@@ -771,10 +734,27 @@ int main()
     int tries {1};
     int wins {0};
     int draws {0};
+
+    Deck deck {};
+    std::array<Card, 7> communalCards {};
+    std::vector<Player> players {gameBeginning(communalCards)};
+
+    for (auto& i : communalCards)
+    {
+        std::cout << i << ' ';
+    }
+    std::cout << '\n';
     
     for (int i {0}; i<tries; ++i)
     {
-        Settings::GameStates game {playGame()};
+        Settings::GameStates game {checkWinner(players, communalCards)};
+
+        for (auto& i : players)
+        {
+            i.print();
+        }
+        std::cout << '\n';
+
         if (game == Settings::win)
         {
             ++wins;
@@ -785,7 +765,7 @@ int main()
         }
     }
 
-    std::cout << wins << ' ' << draws << '\n';
+    std::cout << '\n' << wins << ' ' << draws << ' ' << tries - draws - wins << '\n';
 
     return 0;
 }
