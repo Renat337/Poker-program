@@ -23,6 +23,15 @@ namespace Settings
         max_rankings
     };
 
+    enum GameStates
+    {
+        loss,
+        draw,
+        win,
+
+        max_gamestates
+    };
+
     [[maybe_unused]] static constexpr std::array<Rankings, max_rankings> allRankings {high_card, pair, two_pair, three_kind, straight,
                                                                     flush, full_house, four_kind, straight_flush};
 
@@ -66,7 +75,26 @@ struct Player
         return false;
     }
 
-    void print()
+    bool operator==(const Player otherPlayer) const
+    {
+        if (handType != otherPlayer.handType)
+        {
+            return false;
+        }
+
+        for (std::size_t i {0}; i<5; ++i)
+        {
+            if (bestHand[i].rank != otherPlayer.bestHand[i].rank)
+            {
+                std::cout << "ERROR AT " << i<< '\n';
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    void print() const
     {
         std::cout << hand.data()[0] << ' ' << hand.data()[1] << '\n';
         std::cout << handType << '\n';
@@ -554,7 +582,7 @@ std::vector<Player> dealHands(Deck& deck, std::size_t numPlayers, bool controlHa
     
 }
 
-int playGame()
+Settings::GameStates playGame()
 {
     Deck deck {};
 
@@ -571,6 +599,7 @@ int playGame()
     std::array<Card,7> communalCards {};
     std::vector<Card> usedCards {};
     usedCards.reserve(5+2*numPlayers);
+    players.data()[0].isPlayer = true;
 
     char controlCommunalChar {};
     bool controlCommunal {};
@@ -712,9 +741,28 @@ int playGame()
     //     return final.isPlayer;
     // }
 
-    std::cout << "Winner:\n";
-    winning.back().print();
-    return winning.back().isPlayer;
+    for (const auto& i : winning)
+    {
+        i.print();
+    }
+
+    for (int i {0}; i<std::ssize(winning); ++i)
+    {
+        if (winning.data()[i].isPlayer && i==std::ssize(winning)-1)
+        {
+            return Settings::win;
+        }
+        if (winning.data()[i].isPlayer && winning.data()[i] == winning.back())
+        {
+            return Settings::draw;
+        }
+        if (winning.data()[i].isPlayer)
+        {
+            return Settings::loss;
+        }
+    }
+
+    return Settings::loss;
 
 }
 
@@ -722,16 +770,22 @@ int main()
 {
     int tries {1};
     int wins {0};
+    int draws {0};
     
     for (int i {0}; i<tries; ++i)
     {
-        if (playGame())
+        Settings::GameStates game {playGame()};
+        if (game == Settings::win)
         {
             ++wins;
         }
+        if (game == Settings::draw)
+        {
+            ++draws;
+        }
     }
 
-    std::cout << static_cast<double>(wins)/tries << '\n';
+    std::cout << wins << ' ' << draws << '\n';
 
     return 0;
 }
