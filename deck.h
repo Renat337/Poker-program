@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <vector>
 #include "Random.h"
-#include <algorithm>
 
 struct Card
 {
