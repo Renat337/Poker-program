@@ -92,8 +92,6 @@ struct Player
         {
             if (bestHand[i].rank != otherPlayer.bestHand[i].rank)
             {
-                // not sure why error was here
-                // std::cout << "ERROR AT " << i<< '\n';
                 return false;
             }
         }
