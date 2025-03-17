@@ -1,3 +1,6 @@
+#ifndef DECK_H
+#define DECK_H
+
 #include <iostream>
 #include <cassert>
 #include <string>
@@ -181,3 +184,5 @@ class Deck
             return false;
         }
 };
+
+#endif
