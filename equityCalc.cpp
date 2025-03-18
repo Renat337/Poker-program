@@ -62,7 +62,7 @@ std::pair<int, std::vector<Card>> getCommunalCards()
             std::cin >> communalCards.data()[i];
         }
     }
-
+    
     return {numCommunal, std::move(communalCards)};
 }
 
@@ -70,15 +70,15 @@ Settings::GameStates checkWinner(std::vector<Player>& players, std::vector<Card>
 {
     static const std::vector<HandFunction> handFunctions
     {
-    {&straightFlush<std::vector<Card>>, Settings::straight_flush},
-    {&fourOfKind<std::vector<Card>>, Settings::four_kind},
-    {&fullHouse<std::vector<Card>>, Settings::full_house},
-    {&flush<std::vector<Card>>, Settings::flush},
-    {&straight<std::vector<Card>>, Settings::straight},
-    {&threeOfKind<std::vector<Card>>, Settings::three_kind},
-    {&twoPair<std::vector<Card>>, Settings::two_pair},
-    {&pair<std::vector<Card>>, Settings::pair},
-    {&highCard<std::vector<Card>>, Settings::high_card}
+    {&straightFlush, Settings::straight_flush},
+    {&fourOfKind, Settings::four_kind},
+    {&fullHouse, Settings::full_house},
+    {&flush, Settings::flush},
+    {&straight, Settings::straight},
+    {&threeOfKind, Settings::three_kind},
+    {&twoPair, Settings::two_pair},
+    {&pair, Settings::pair},
+    {&highCard, Settings::high_card}
     };
 
     Settings::Rankings bestHandType {Settings::high_card};

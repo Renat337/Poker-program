@@ -65,13 +65,13 @@ void Player::print() const
     std::cout << "Is player: " << isPlayer;
 }
 
-template <typename T>
-std::vector<Card> flush(const T& cards)
+
+std::vector<Card> flush(std::vector<Card> cards)
 {
     std::vector<Card> bestHand(5);
 
     Card::groupBySuitSort = true;
-    T cardsCopy = cards;
+    std::vector<Card> cardsCopy = cards;
     std::sort(cardsCopy.begin(),cardsCopy.end());
     
     Card::Suits prevSuit {Card::max_suits};
@@ -95,8 +95,8 @@ std::vector<Card> flush(const T& cards)
 
 }
 
-template <typename T>
-std::vector<Card> straight(const T& cards)
+
+std::vector<Card> straight(std::vector<Card> cards)
 {
     std::array<Card, Card::max_ranks+1> rankCounter {};
     std::vector<Card> bestHand {};
@@ -137,8 +137,8 @@ std::vector<Card> straight(const T& cards)
     return {};
 }
 
-template <typename T>
-std::vector<Card> straightFlush(const T& cards)
+
+std::vector<Card> straightFlush(std::vector<Card> cards)
 {
     std::array suitCounter {0,0,0,0};
     Card::Suits maxSuit  {Card::max_suits};
@@ -172,12 +172,12 @@ std::vector<Card> straightFlush(const T& cards)
     return straight(candidates);
 }
 
-template <typename T>
-std::vector<Card> fourOfKind(const T& cards)
+
+std::vector<Card> fourOfKind(std::vector<Card> cards)
 {
     std::vector<Card> bestHand {};
     bestHand.reserve(5);
-    T cardsCopy = cards;
+    std::vector<Card> cardsCopy = cards;
 
     Card::groupBySuitSort = false;
     std::sort(cardsCopy.begin(),cardsCopy.end());
@@ -220,12 +220,12 @@ std::vector<Card> fourOfKind(const T& cards)
     return {};
 }
 
-template <typename T>
-std::vector<Card> threeOfKind(const T& cards)
+
+std::vector<Card> threeOfKind(std::vector<Card> cards)
 {
     std::vector<Card> bestHand {};
     bestHand.reserve(5);
-    T cardsCopy = cards;
+    std::vector<Card> cardsCopy = cards;
 
     Card::groupBySuitSort = false;
     std::sort(cardsCopy.begin(),cardsCopy.end());
@@ -273,12 +273,12 @@ std::vector<Card> threeOfKind(const T& cards)
     return {};
 }
 
-template <typename T>
-std::vector<Card> pair(const T& cards)
+
+std::vector<Card> pair(std::vector<Card> cards)
 {
     std::vector<Card> bestHand {};
     bestHand.reserve(5);
-    T cardsCopy = cards;
+    std::vector<Card> cardsCopy = cards;
 
     Card::groupBySuitSort = false;
     std::sort(cardsCopy.begin(),cardsCopy.end());
@@ -326,12 +326,12 @@ std::vector<Card> pair(const T& cards)
     return {};
 }
 
-template <typename T>
-std::vector<Card> fullHouse(const T& cards)
+
+std::vector<Card> fullHouse(std::vector<Card> cards)
 {
     std::vector<Card> bestHand {};
     bestHand.reserve(5);
-    T cardsCopy = cards;
+    std::vector<Card> cardsCopy = cards;
 
     Card::groupBySuitSort = false;
     std::sort(cardsCopy.begin(),cardsCopy.end());
@@ -402,12 +402,12 @@ std::vector<Card> fullHouse(const T& cards)
 
 }
 
-template <typename T>
-std::vector<Card> twoPair(const T& cards)
+
+std::vector<Card> twoPair(std::vector<Card> cards)
 {
     std::vector<Card> bestHand {};
     bestHand.reserve(5);
-    T cardsCopy = cards;
+    std::vector<Card> cardsCopy = cards;
 
     Card::groupBySuitSort = false;
     std::sort(cardsCopy.begin(),cardsCopy.end());
@@ -488,12 +488,12 @@ std::vector<Card> twoPair(const T& cards)
     return {};
 }
 
-template <typename T>
-std::vector<Card> highCard(const T& cards)
+
+std::vector<Card> highCard(std::vector<Card> cards)
 {
     std::vector<Card> bestHand {};
     bestHand.reserve(5);
-    T cardsCopy = cards;
+    std::vector<Card> cardsCopy = cards;
 
     Card::groupBySuitSort = false;
     std::sort(cardsCopy.begin(),cardsCopy.end());

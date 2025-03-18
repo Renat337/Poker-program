@@ -59,29 +59,12 @@ struct Player
     void print() const;
 };
 
-template <typename T>
-std::vector<Card> flush(const T& cards);
-
-template <typename T>
-std::vector<Card> straight(const T& cards);
-
-template <typename T>
-std::vector<Card> straightFlush(const T& cards);
-
-template <typename T>
-std::vector<Card> fourOfKind(const T& cards);
-
-template <typename T>
-std::vector<Card> threeOfKind(const T& cards);
-
-template <typename T>
-std::vector<Card> pair(const T& cards);
-
-template <typename T>
-std::vector<Card> fullHouse(const T& cards);
-
-template <typename T>
-std::vector<Card> twoPair(const T& cards);
-
-template <typename T>
-std::vector<Card> highCard(const T& cards);
+std::vector<Card> flush(std::vector<Card> cards);
+std::vector<Card> straight(std::vector<Card> cards);
+std::vector<Card> straightFlush(std::vector<Card> cards);
+std::vector<Card> fourOfKind(std::vector<Card> cards);
+std::vector<Card> threeOfKind(std::vector<Card> cards);
+std::vector<Card> pair(std::vector<Card> cards);
+std::vector<Card> fullHouse(std::vector<Card> cards);
+std::vector<Card> twoPair(std::vector<Card> cards);
+std::vector<Card> highCard(std::vector<Card> cards);
