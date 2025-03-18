@@ -754,7 +754,7 @@ void runGame(int tries)
 
 int main()
 {
-    runGame(100000);
+    runGame(1000);
 
     return 0;
 }

@@ -1,5 +1,4 @@
-#ifndef DECK_H
-#define DECK_H
+#pragma once
 
 #include <iostream>
 #include <cassert>
@@ -52,37 +51,11 @@ struct Card
         return out;
     }
 
-    bool operator==(Card otherCard)
-    {
-        return ((rank == otherCard.rank) && (suit == otherCard.suit));
-    }
+    bool operator==(Card otherCard);
 
     inline static bool groupBySuitSort {true};
 
-    bool operator<(const Card& otherCard) const
-    {
-
-        auto cardVal {(rank == rank_ace) ? max_ranks : rank};
-        auto otherCardVal {(otherCard.rank == rank_ace) ? max_ranks : otherCard.rank};
-
-        if (groupBySuitSort)
-        {
-            if (suit != otherCard.suit)
-            {
-                return suit < otherCard.suit;
-            }
-
-            return cardVal < otherCardVal;
-        }
-        
-        if (cardVal != otherCardVal)
-        {
-            return cardVal < otherCardVal;
-        }
-
-        return suit < otherCard.suit;
-
-    }
+    bool operator<(const Card& otherCard) const;
 
     friend std::istream& operator>>(std::istream& in, Card& card)
     {
@@ -126,63 +99,15 @@ struct Card
 class Deck
 {
     private:
-
         static constexpr size_t m_decksize {52};
         std::array<Card, m_decksize> m_deck {};
         std::size_t m_nextCardIndex {0};
         std::vector <Card> m_cardsChosen {};
 
     public:
-    
-        Deck()
-        {
-            size_t counter {0};
-            for (auto s : Card::allSuits)
-            {
-                for (auto r : Card::allRanks)
-                {
-                    m_deck[counter] = Card {r, s};
-                    ++counter;
-                }
-            }
-        }
-        
-        void shuffle()
-        {
-            m_cardsChosen.clear();
-            std::shuffle(m_deck.begin(), m_deck.end(), Random::mt);
-            m_nextCardIndex = 0;
-        }
-
-        void shuffle(const std::vector<Card>& cardsChosen)
-        {
-            m_cardsChosen = cardsChosen;
-            std::shuffle(m_deck.begin(), m_deck.end(), Random::mt);
-            m_nextCardIndex = 0;
-        }
-
-        Card dealCard()
-        {
-            assert(m_nextCardIndex != 52 && "Deck::dealCard ran out of cards");
-            while (in(m_deck[m_nextCardIndex],m_cardsChosen))
-            {
-                ++m_nextCardIndex;
-            }
-            return m_deck[m_nextCardIndex++];
-        }
-
-        bool in(Card card, const std::vector<Card>& set)
-        {
-            for (auto i : set)
-            {
-                if (card == i)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        Deck();
+        void shuffle();
+        void shuffle(const std::vector<Card>& cardsChosen);
+        Card dealCard();
+        bool in(Card card, const std::vector<Card>& set);
 };
-
-#endif
