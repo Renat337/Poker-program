@@ -86,8 +86,8 @@ Settings::GameStates checkWinner(std::vector<Player>& players, std::vector<Card>
 
     for (auto& player : players)
     {
-        communalCards.data()[5] = player.hand.data()[0];
-        communalCards.data()[6] = player.hand.data()[1];
+        communalCards.data()[5] = player.hand.first;
+        communalCards.data()[6] = player.hand.second;
 
         for (const auto& handFunc : handFunctions)
         {
@@ -153,8 +153,8 @@ void runTests(int tries)
     usedCards.reserve(static_cast<std::size_t>(numHands*2+numCommunal));
     for (std::size_t i {0}; i < static_cast<std::size_t>(numHands); ++i)
     {
-        usedCards.push_back(players.data()[i].hand[0]);
-        usedCards.push_back(players.data()[i].hand[1]);
+        usedCards.push_back(players.data()[i].hand.first);
+        usedCards.push_back(players.data()[i].hand.second);
     }
     for (std::size_t i {0}; i < static_cast<std::size_t>(numCommunal); ++i)
     {
@@ -195,11 +195,4 @@ void runTests(int tries)
     std::cout << "Draw rate: " << 100 * static_cast<double>(draws)/tries << "%\n";
     std::cout << "Loss rate: " << 100 * static_cast<double>(tries-wins-draws)/tries << "%\n";
 
-}
-
-int main()
-{
-    runTests(1000);
-
-    return 0;
 }

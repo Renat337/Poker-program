@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <utility>
 #include "deck.h"
 
 namespace Settings
@@ -42,14 +43,14 @@ namespace Settings
 
 struct Player
 {
-    std::array<Card, 2> hand {};
+    std::pair<Card,Card> hand {};
     int chips {Settings::buyIn};
     Settings::Rankings handType {};
     std::vector<Card> bestHand {};
     bool isPlayer {false};
 
     Player(Card card1, Card card2)
-    : hand {card1, card2} {}
+    : hand{card1, card2} {}
 
     Player()
     {}

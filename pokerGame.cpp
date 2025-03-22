@@ -54,7 +54,7 @@ bool Player::operator==(const Player otherPlayer) const
 
 void Player::print() const
 {
-    std::cout << hand.data()[0] << ' ' << hand.data()[1] << '\n';
+    std::cout << hand.first << ' ' << hand.second << '\n';
     std::cout << handType << '\n';
     
     for (const auto& i : bestHand)
